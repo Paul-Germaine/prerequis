@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NEOMA - Diagnostic de compatibilité de votre ordinateur</title>
+  <style>
+    :root {
+      --bg: #f5f6f8;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --accent: #111827;
+      --ok: #15803d;
+      --ok-bg: #f0fdf4;
+      --warn: #b45309;
+      --warn-bg: #fffbeb;
+      --bad: #b91c1c;
+      --bad-bg: #fef2f2;
+      --info: #1d4ed8;
+      --info-bg: #eff6ff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .topbar {
+      background: #111;
+      color: white;
+      padding: 18px 24px;
+    }
+
+    .topbar .brand {
+      max-width: 1080px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-weight: 700;
+      letter-spacing: .2px;
+    }
+
+    .logo {
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
+      background: white;
+      color: #111;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      font-size: 12px;
+    }
+
+    .container {
+      max-width: 1080px;
+      margin: 36px auto;
+      padding: 0 20px 48px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.5fr .8fr;
+      gap: 24px;
+      align-items: stretch;
+      margin-bottom: 24px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 8px 20px rgba(0,0,0,.03);
+    }
+
+    h1 { margin-top: 0; font-size: 32px; line-height: 1.15; }
+    h2 { margin-top: 0; font-size: 22px; }
+    h3 { margin: 0 0 8px; font-size: 17px; }
+
+    .lead {
+      font-size: 18px;
+      color: #374151;
+      margin-bottom: 20px;
+    }
+
+    .muted { color: var(--muted); }
+
+    .badge {
+      display: inline-block;
+      font-size: 13px;
+      padding: 5px 9px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #fafafa;
+      margin-right: 6px;
+      margin-bottom: 6px;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 10px;
+      padding: 12px 18px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .primary { background: var(--accent); color: white; }
+    .secondary { background: #f3f4f6; color: #111827; border: 1px solid var(--border); }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 16px;
+    }
+
+    .check {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      display: grid;
+      grid-template-columns: 42px 1fr;
+      gap: 12px;
+      align-items: start;
+    }
+
+    .icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      background: #f3f4f6;
+    }
+
+    .ok { border-color: #bbf7d0; background: var(--ok-bg); }
+    .ok .icon { background: #dcfce7; color: var(--ok); }
+    .warn { border-color: #fde68a; background: var(--warn-bg); }
+    .warn .icon { background: #fef3c7; color: var(--warn); }
+    .bad { border-color: #fecaca; background: var(--bad-bg); }
+    .bad .icon { background: #fee2e2; color: var(--bad); }
+    .info { border-color: #bfdbfe; background: var(--info-bg); }
+    .info .icon { background: #dbeafe; color: var(--info); }
+
+    .section { margin-top: 24px; }
+
+    .question {
+      padding: 18px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .question:last-child { border-bottom: 0; }
+
+    .choices {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .choice {
+      border: 1px solid var(--border);
+      background: white;
+      color: #111827;
+      padding: 9px 14px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .choice.selected {
+      background: #111827;
+      color: white;
+      border-color: #111827;
+    }
+
+    .result {
+      border-radius: 14px;
+      padding: 20px;
+      margin-top: 20px;
+      display: none;
+    }
+
+    .result.show { display: block; }
+
+    .result ul { margin-bottom: 0; }
+
+    .progress {
+      height: 8px;
+      background: #e5e7eb;
+      border-radius: 999px;
+      overflow: hidden;
+      margin: 16px 0 8px;
+    }
+
+    .progress > div {
+      height: 100%;
+      width: 0;
+      background: #111827;
+      transition: width .3s ease;
+    }
+
+    .small { font-size: 13px; }
+
+    .privacy {
+      border-left: 4px solid #d1d5db;
+      padding-left: 14px;
+      color: #4b5563;
+      font-size: 14px;
+    }
+
+    @media (max-width: 800px) {
+      .hero, .grid { grid-template-columns: 1fr; }
+      h1 { font-size: 27px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">NEOMA</div>
+      <div>Diagnostic de compatibilité informatique</div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <div class="card">
+        <div class="badge">Étudiants</div>
+        <div class="badge">Avant la rentrée</div>
+        <div class="badge">Accessible à tout moment</div>
+        <h1>Votre ordinateur est-il prêt pour votre cursus à NEOMA ?</h1>
+        <p class="lead">Ce diagnostic vérifie les principaux prérequis nécessaires pour suivre vos cours, participer à des visioconférences et utiliser les logiciels pédagogiques.</p>
+        <p class="muted">Le contrôle dure environ 2 minutes. Aucun fichier personnel n'est lu ou transmis.</p>
+        <div class="actions">
+          <button class="primary" id="startBtn">Lancer le diagnostic</button>
+          <button class="secondary" onclick="document.getElementById('requirements').scrollIntoView({behavior:'smooth'})">Voir les prérequis</button>
+        </div>
+      </div>
+
+      <aside class="card">
+        <h2>Ce que nous vérifions</h2>
+        <p><strong>Automatiquement :</strong></p>
+        <p class="muted">Système, type d'appareil, navigateur, caméra, microphone, connexion réseau.</p>
+        <p><strong>Avec votre aide :</strong></p>
+        <p class="muted">Mémoire vive, espace disque, antivirus et logiciels installés.</p>
+        <div class="privacy">Le navigateur limite volontairement l'accès à certaines informations matérielles. Le résultat est donc un diagnostic de compatibilité, pas un inventaire complet du poste.</div>
+      </aside>
+    </section>
+
+    <section class="card section" id="diagnostic" style="display:none;">
+      <h2>1. Vérifications automatiques</h2>
+      <div class="progress"><div id="progressBar"></div></div>
+      <p class="small muted" id="progressText">Diagnostic en cours...</p>
+      <div class="grid" id="checks"></div>
+    </section>
+
+    <section class="card section" id="manual" style="display:none;">
+      <h2>2. Quelques vérifications complémentaires</h2>
+
+      <div class="question" data-key="ram">
+        <h3>Votre ordinateur dispose-t-il d'au moins 8 Go de mémoire vive (RAM) ?</h3>
+        <div class="choices">
+          <button class="choice" data-value="yes">Oui</button>
+          <button class="choice" data-value="no">Non</button>
+          <button class="choice" data-value="unknown">Je ne sais pas</button>
+        </div>
+      </div>
+
+      <div class="question" data-key="storage">
+        <h3>Disposez-vous d'au moins 10 Go d'espace disque libre ?</h3>
+        <div class="choices">
+          <button class="choice" data-value="yes">Oui</button>
+          <button class="choice" data-value="no">Non</button>
+          <button class="choice" data-value="unknown">Je ne sais pas</button>
+        </div>
+      </div>
+
+      <div class="question" data-key="antivirus">
+        <h3>Votre antivirus ou la protection Windows est-il actif et à jour ?</h3>
+        <div class="choices">
+          <button class="choice" data-value="yes">Oui</button>
+          <button class="choice" data-value="no">Non</button>
+          <button class="choice" data-value="unknown">Je ne sais pas</button>
+        </div>
+      </div>
+
+      <div class="question" data-key="office">
+        <h3>Microsoft Office est-il installé ou pourrez-vous l'installer avec votre compte NEOMA ?</h3>
+        <div class="choices">
+          <button class="choice" data-value="yes">Oui</button>
+          <button class="choice" data-value="no">Non</button>
+          <button class="choice" data-value="unknown">Je ne sais pas</button>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="primary" id="resultBtn">Afficher mon résultat</button>
+      </div>
+
+      <div id="result" class="result"></div>
+    </section>
+
+    <section class="card section" id="requirements">
+      <h2>Prérequis recommandés NEOMA</h2>
+      <div class="grid">
+        <div class="check info"><div class="icon">OS</div><div><h3>Système d'exploitation</h3><p>Windows 11 ou macOS récent et maintenu.</p></div></div>
+        <div class="check info"><div class="icon">CPU</div><div><h3>Processeur</h3><p>Intel Core i5 ou équivalent, ou mieux.</p></div></div>
+        <div class="check info"><div class="icon">RAM</div><div><h3>Mémoire</h3><p>8 Go minimum.</p></div></div>
+        <div class="check info"><div class="icon">SSD</div><div><h3>Stockage</h3><p>10 Go d'espace libre minimum.</p></div></div>
+        <div class="check info"><div class="icon">AV</div><div><h3>Protection</h3><p>Antivirus / protection système à jour.</p></div></div>
+        <div class="check info"><div class="icon">NET</div><div><h3>Connexion</h3><p>5 Mbit/s minimum recommandé hors campus.</p></div></div>
+      </div>
+      <p class="muted" style="margin-top:18px;"><strong>Attention :</strong> les tablettes et Chromebooks ne sont pas adaptés comme équipement principal pour les usages pédagogiques NEOMA.</p>
+    </section>
+  </main>
+
+  <script>
+    const state = { automatic: {}, manual: {} };
+
+    function detectOS() {
+      const ua = navigator.userAgent;
+      const platform = navigator.platform || '';
+      if (/CrOS/i.test(ua)) return { label: 'ChromeOS / Chromebook', status: 'bad', detail: 'Les Chromebooks ne sont pas adaptés comme poste principal pour les usages NEOMA.' };
+      if (/iPad|iPhone|Android/i.test(ua) && !/Windows|Macintosh/i.test(ua)) return { label: 'Tablette / mobile', status: 'bad', detail: 'Un ordinateur portable Windows ou macOS est nécessaire.' };
+      if (/Windows NT/i.test(ua)) {
+        if (/Windows NT 10.0/i.test(ua)) return { label: 'Windows détecté', status: 'ok', detail: 'Windows détecté. Windows 11 est recommandé.' };
+        return { label: 'Ancienne version de Windows', status: 'warn', detail: 'Une mise à niveau peut être nécessaire.' };
+      }
+      if (/Mac/i.test(platform) || /Macintosh/i.test(ua)) return { label: 'macOS détecté', status: 'ok', detail: 'Vérifiez que votre version de macOS est encore supportée.' };
+      return { label: 'Système non identifié', status: 'warn', detail: 'La compatibilité devra être vérifiée manuellement.' };
+    }
+
+    function detectBrowser() {
+      const ua = navigator.userAgent;
+      let browser = 'Navigateur non identifié';
+      let status = 'warn';
+      if (/Edg\//.test(ua)) { browser = 'Microsoft Edge'; status = 'ok'; }
+      else if (/Chrome\//.test(ua) && !/Edg\//.test(ua)) { browser = 'Google Chrome'; status = 'ok'; }
+      else if (/Firefox\//.test(ua)) { browser = 'Mozilla Firefox'; status = 'ok'; }
+      else if (/Safari\//.test(ua) && !/Chrome\//.test(ua)) { browser = 'Safari'; status = 'warn'; }
+      return { label: browser, status, detail: status === 'ok' ? 'Navigateur compatible détecté.' : 'Chrome ou Firefox à jour sont recommandés.' };
+    }
+
+    async function checkMedia(kind) {
+      try {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          return { label: kind === 'video' ? 'Caméra' : 'Microphone', status: 'warn', detail: 'Impossible de tester ce périphérique dans ce navigateur.' };
+        }
+        const constraints = kind === 'video' ? { video: true } : { audio: true };
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        stream.getTracks().forEach(t => t.stop());
+        return { label: kind === 'video' ? 'Caméra opérationnelle' : 'Microphone opérationnel', status: 'ok', detail: 'Le périphérique est accessible.' };
+      } catch (e) {
+        return { label: kind === 'video' ? 'Caméra non validée' : 'Microphone non validé', status: 'warn', detail: 'Accès refusé ou périphérique indisponible. Vous pourrez le vérifier dans les paramètres.' };
+      }
+    }
+
+    function connectionCheck() {
+      const c = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+      if (!c) return { label: 'Connexion réseau', status: 'info', detail: 'Le navigateur ne permet pas de mesurer précisément le débit. Un test de vitesse dédié est recommandé.' };
+      const down = c.downlink || 0;
+      if (down >= 5) return { label: `Connexion estimée : ${down} Mbit/s`, status: 'ok', detail: 'Débit estimé compatible avec les usages courants.' };
+      if (down > 0) return { label: `Connexion estimée : ${down} Mbit/s`, status: 'warn', detail: 'Débit inférieur aux 5 Mbit/s recommandés.' };
+      return { label: 'Connexion réseau', status: 'info', detail: 'Débit non mesurable automatiquement.' };
+    }
+
+    function renderCheck(key, result) {
+      state.automatic[key] = result;
+      const el = document.createElement('div');
+      el.className = `check ${result.status}`;
+      const symbol = result.status === 'ok' ? '✓' : result.status === 'bad' ? '!' : result.status === 'warn' ? '?' : 'i';
+      el.innerHTML = `<div class="icon">${symbol}</div><div><h3>${result.label}</h3><p>${result.detail}</p></div>`;
+      document.getElementById('checks').appendChild(el);
+    }
+
+    async function runDiagnostic() {
+      document.getElementById('diagnostic').style.display = 'block';
+      document.getElementById('manual').style.display = 'block';
+      document.getElementById('checks').innerHTML = '';
+      document.getElementById('diagnostic').scrollIntoView({behavior:'smooth'});
+
+      const steps = [
+        ['os', async()=>detectOS()],
+        ['browser', async()=>detectBrowser()],
+        ['camera', async()=>checkMedia('video')],
+        ['microphone', async()=>checkMedia('audio')],
+        ['network', async()=>connectionCheck()]
+      ];
+
+      for (let i = 0; i < steps.length; i++) {
+        const [key, fn] = steps[i];
+        const res = await fn();
+        renderCheck(key, res);
+        const percent = Math.round(((i+1)/steps.length)*100);
+        document.getElementById('progressBar').style.width = percent+'%';
+        document.getElementById('progressText').textContent = percent === 100 ? 'Vérifications automatiques terminées.' : `Diagnostic en cours... ${percent}%`;
+      }
+    }
+
+    document.getElementById('startBtn').addEventListener('click', runDiagnostic);
+
+    document.querySelectorAll('.question').forEach(q => {
+      q.querySelectorAll('.choice').forEach(btn => {
+        btn.addEventListener('click', () => {
+          q.querySelectorAll('.choice').forEach(b => b.classList.remove('selected'));
+          btn.classList.add('selected');
+          state.manual[q.dataset.key] = btn.dataset.value;
+        });
+      });
+    });
+
+    document.getElementById('resultBtn').addEventListener('click', () => {
+      const result = document.getElementById('result');
+      const issues = [];
+      const warnings = [];
+
+      Object.values(state.automatic).forEach(r => {
+        if (r.status === 'bad') issues.push(r.label);
+        else if (r.status === 'warn') warnings.push(r.label);
+      });
+
+      Object.entries(state.manual).forEach(([key, value]) => {
+        const labels = {
+          ram: 'Mémoire vive inférieure au prérequis',
+          storage: 'Espace disque insuffisant',
+          antivirus: 'Protection antivirus non confirmée',
+          office: 'Disponibilité de Microsoft Office non confirmée'
+        };
+        if (value === 'no') issues.push(labels[key]);
+        if (value === 'unknown') warnings.push(labels[key]);
+      });
+
+      const missingAnswers = 4 - Object.keys(state.manual).length;
+      if (missingAnswers > 0) warnings.push(`${missingAnswers} vérification(s) complémentaire(s) non renseignée(s)`);
+
+      if (issues.length) {
+        result.className = 'result bad show';
+        result.innerHTML = `<h2>Votre équipement présente une incompatibilité</h2><p>Certains éléments risquent d'empêcher le bon déroulement de vos activités pédagogiques.</p><ul>${issues.map(i=>`<li>${i}</li>`).join('')}</ul>${warnings.length?`<p><strong>Points à vérifier :</strong></p><ul>${warnings.map(i=>`<li>${i}</li>`).join('')}</ul>`:''}<p><strong>Action recommandée :</strong> consultez les prérequis NEOMA, adaptez votre équipement si nécessaire ou contactez le support / la Vie Étudiante pour connaître les solutions disponibles.</p>`;
+      } else if (warnings.length) {
+        result.className = 'result warn show';
+        result.innerHTML = `<h2>Votre équipement semble compatible, avec quelques points à vérifier</h2><p>Aucune incompatibilité bloquante n'a été détectée, mais certains éléments doivent être confirmés.</p><ul>${warnings.map(i=>`<li>${i}</li>`).join('')}</ul>`;
+      } else {
+        result.className = 'result ok show';
+        result.innerHTML = `<h2>Votre équipement semble compatible avec les usages NEOMA</h2><p>Les principaux prérequis contrôlables sont satisfaits. Ce diagnostic ne remplace toutefois pas les exigences spécifiques pouvant être communiquées pour certains logiciels ou examens.</p>`;
+      }
+      result.scrollIntoView({behavior:'smooth'});
+    });
+  </script>
+</body>
+</html>
